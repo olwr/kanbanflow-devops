@@ -1,0 +1,23 @@
+# Ambiente
+.env
+*.local
+
+# Dependências
+/vendor/
+/node_modules/
+
+# Dados e logs
+/db/data/
+*.log
+*.sqlite
+
+# Editores e SO
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# Build/temporários
+/tmp/
+*.tar
