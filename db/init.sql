@@ -3,7 +3,7 @@ SET NAMES utf8mb4;
 CREATE TABLE IF NOT EXISTS tasks (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     title VARCHAR(120) NOT NULL,
-    desc TEXT NULL,
+    description TEXT NULL,
     status ENUM('todo', 'doing', 'done') NOT NULL DEFAULT 'todo',
     priority ENUM('baixa', 'media', 'alta') NOT NULL DEFAULT 'media',
     assignee VARCHAR(60) NULL,
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS tasks (
 -- Carga inicial: espelha o diagnóstico da CodeFactory Solutions
 INSERT INTO tasks (
         title,
-        desc,
+        description,
         status,
         priority,
         assignee,
