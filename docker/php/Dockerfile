@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Configuração do servidor
 COPY docker/apache/000-default.conf /etc/apache2/sites-available/000-default.conf
+COPY docker/apache/ports.conf /etc/apache2/ports.conf
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/99-kanbanflow.ini
 
 # Código da aplicação (em desenvolvimento é sobreposto por bind mount)
@@ -24,4 +25,4 @@ WORKDIR /var/www/html
 EXPOSE 81
 
 HEALTHCHECK --interval=15s --timeout=5s --start-period=20s --retries=5 \
-    CMD curl -fsS http://localhost/api/health.php || exit 1
+    CMD curl -fsS http://localhost:81/api/health.php || exit 1
