@@ -69,7 +69,7 @@ try {
         case 'POST':
             $data = json_body();
             if ($errors = validate($data)) {
-                json_response(['erro' => 'Dados inválidos.', 'campos' => $errors], 422);
+                json_response(['erro' => 'Dados inválidos.', 'campos' => $errors], 422)
             }
             $status = $data['status'] ?? 'todo';
             $next = db()->prepare('SELECT COALESCE(MAX(position), 0) + 1 AS p FROM tasks WHERE status = :s');
