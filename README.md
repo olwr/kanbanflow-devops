@@ -48,6 +48,46 @@ kanbanflow/
 └── README.md
 ```
 
+## Instruções de instalação
+
+Pré-requisitos: Docker Engine 24+ e Docker Compose v2. Nada mais precisa ser
+instalado na máquina — nem PHP, nem MariaDB, nem Apache.
+
+```bash
+git clone https://github.com/olwr/kanbanflow-devops.git
+cd kanbanflow-devops
+cp .env.example .env      # ajuste as senhas se desejar
+docker compose build
+```
+
+## Instruções de execução
+
+```bash
+docker compose up -d          # sobe app + banco
+docker compose ps             # confere o estado (healthy)
+docker compose logs -f app    # acompanha os logs do Apache/PHP
+```
+
+Acesse **<http://localhost:8080>**. A API responde em `http://localhost:8080/api/tasks.php`
+e a verificação de saúde em `http://localhost:8080/api/health.php`.
+
+Para encerrar:
+
+```bash
+docker compose down           # mantém os dados no volume
+docker compose down -v        # remove também o volume do banco
+```
+
+## Endpoints da API
+
+| Método | Rota | Ação |
+| --- | --- | --- |
+| GET | /api/tasks.php | Lista todas as tarefas |
+| GET | /api/tasks.php?id=1 | Retorna uma tarefa |
+| POST | /api/tasks.php | Cria tarefa |
+| PUT | /api/tasks.php?id=1 | Atualiza tarefa |
+| DELETE | /api/tasks.php?id=1 | Exclui tarefa |
+
 ## Equipe
 
 | Nome | RU | Frente |
