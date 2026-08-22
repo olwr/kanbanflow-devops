@@ -1,0 +1,66 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-e-subir-container:
+    name: Construir imagem e subir o container
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ler a versão do projeto
+        id: versao
+        run: echo "valor=$(cat VERSION)" >> "$GITHUB_OUTPUT"
+
+      - name: Construir a imagem de produção
+        run: |
+          docker build \
+            -f docker/php/Dockerfile \
+            -t kanbanflow-app:${{ steps.versao.outputs.valor }} \
+            -t kanbanflow-app:${{ github.sha }} \
+            -t kanbanflow-app:latest .
+
+      - name: Subir o ambiente com a imagem construída
+        run: |
+          cp .env.example .env
+          echo "APP_ENV=production" >> .env
+          echo "APP_VERSION=${{ steps.versao.outputs.valor }}" >> .env
+          docker compose up -d
+
+      - name: Verificar saúde após a subida
+        run: |
+          for tentativa in $(seq 1 30); do
+            if curl -fsS http://localhost:8080/api/health.php; then exit 0; fi
+            sleep 4
+          done
+          docker compose logs; exit 1
+
+      - name: Publicar a imagem no GitHub Container Registry
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          destino=ghcr.io/${{ github.repository_owner }}/kanbanflow-app
+          docker tag kanbanflow-app:latest $destino:${{ steps.versao.outputs.valor }}
+          docker tag kanbanflow-app:latest $destino:latest
+          docker push $destino:${{ steps.versao.outputs.valor }}
+          docker push $destino:latest
+
+      - name: Resumo da execução
+        run: |
+          {
+            echo "## Deploy concluído"
+            echo "- Versão: ${{ steps.versao.outputs.valor }}"
+            echo "- Commit: ${{ github.sha }}"
+            echo "- Imagem: ghcr.io/${{ github.repository_owner }}/kanbanflow-app"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Encerrar o ambiente do runner
+        if: always()
+        run: docker compose down -v
