@@ -1,0 +1,33 @@
+name: Promote
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  abrir-pr-para-main:
+    name: Abrir ou atualizar PR dev → main
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Criar ou atualizar o Pull Request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          existente=$(gh pr list --base main --head dev --state open --json number --jq '.[0].number')
+          if [ -n "$existente" ]; then
+            echo "PR #$existente já aberto; ele acompanha os novos commits automaticamente."
+          else
+            gh pr create --base main --head dev \
+              --title "release: promover dev para main" \
+              --body "Pull Request criado automaticamente pela pipeline após integração em dev.
+              Só pode ser mesclado com o workflow de CI aprovado."
+          fi
